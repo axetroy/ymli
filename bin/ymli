@@ -3,44 +3,10 @@
 const fs = require('fs');
 const path = require('path');
 const process = require('process');
-const argv = require('yargs').argv;
 
 const _ = require('lodash');
 const Yml = require('yml');
-
-let filePath = argv._[0];
-let dist = argv.out || '';
-
-if (_.isBoolean(dist)) {
-  throw new Error('out argument must be a string');
-}
-
-if (!filePath) {
-  throw new Error('mush specify a yml file');
-}
-
-filePath = path.resolve(process.env.PWD, filePath);
-dist = path.resolve(process.env.PWD, dist);
-
-ymlParser(filePath, function (err, content) {
-  if (err) {
-    console.log(err);
-    return;
-  }
-
-  // 配置文件
-  let config = configParser(content);
-
-  // 纯粹语言包
-  let langPack = langParser(content);
-
-  if (!hasDirExist(dist)) fs.mkdirSync(dist);
-
-  _.each(config.supports, function (local) {
-    generateJSON(local, langPack[local]);
-  });
-
-});
+const program = require('commander');
 
 /**
  * 解析yml
@@ -130,11 +96,52 @@ function hasDirExist(path) {
  * 生成一个json文件
  * @param local
  * @param content
+ * @param output
  * @param callback
  */
-function generateJSON(local, content, callback) {
-  fs.writeFile(path.join(dist, `${local}.json`), JSON.stringify(content, null, 2), function (err) {
+function generateJSON(local, content, output, callback) {
+  fs.writeFile(path.join(output, `${local}.local.json`), JSON.stringify(content, null, 2), function (err) {
     if (err) throw err;
     callback && callback(err);
   });
 }
+
+function generate() {
+  let {file, output} = program;
+
+  if (!file) throw new Error('file is required');
+  if (!output) throw new Error('output dir is required');
+
+  ymlParser(file, function (err, content) {
+    if (err) {
+      throw err;
+    }
+
+    // 配置文件
+    let config = configParser(content);
+
+    // 纯粹语言包
+    let langPack = langParser(content);
+
+    if (!hasDirExist(output)) fs.mkdirSync(output);
+
+    _.each(config.supports, function (local) {
+      generateJSON(local, langPack[local], output);
+    });
+
+  });
+}
+
+program
+  .version('0.0.1')
+  .usage('generate <options>')
+  .option('-f, --file [file]', 'compile yml file')
+  .option('-o, --output [path]', 'set an output path', './')
+  .option('-z, --zip', 'zip the json file');
+
+program
+  .command('generate ')
+  .description('compile the yml file and generate i18n file')
+  .action(generate);
+
+program.parse(process.argv);

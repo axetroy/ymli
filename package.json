@@ -3,14 +3,21 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "./node_modules/.bin/mocha ./tests"
   },
   "author": "axetroy",
   "license": "ISC",
   "bin": "./bin/ymli",
   "dependencies": {
+    "bluebird": "^3.4.6",
+    "co": "^4.6.0",
+    "commander": "^2.9.0",
     "lodash": "^4.17.2",
     "yargs": "^6.5.0",
     "yml": "^0.0.5"
+  },
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "mocha": "^3.2.0"
   }
 }

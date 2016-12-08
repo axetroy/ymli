@@ -2,3 +2,5 @@ dist
 *.log
 .idea
 node_modules
+.tmp
+*.local.json

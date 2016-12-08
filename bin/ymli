@@ -2,13 +2,25 @@
 
 const fs = require('fs');
 const path = require('path');
+const process = require('process');
 const argv = require('yargs').argv;
 
 const _ = require('lodash');
 const Yml = require('yml');
 
-const filePath = argv._[0];
-const DIST = argv.out === void 0 ? './' : typeof argv.out === 'boolean' ? './' : argv.out;
+let filePath = argv._[0];
+let dist = argv.out || '';
+
+if (_.isBoolean(dist)) {
+  throw new Error('out argument must be a string');
+}
+
+if (!filePath) {
+  throw new Error('mush specify a yml file');
+}
+
+filePath = path.resolve(process.env.PWD, filePath);
+dist = path.resolve(process.env.PWD, dist);
 
 ymlParser(filePath, function (err, content) {
   if (err) {
@@ -22,7 +34,7 @@ ymlParser(filePath, function (err, content) {
   // 纯粹语言包
   let langPack = langParser(content);
 
-  if (!hasDirExist(DIST)) fs.mkdirSync(DIST);
+  if (!hasDirExist(dist)) fs.mkdirSync(dist);
 
   _.each(config.supports, function (local) {
     generateJSON(local, langPack[local]);
@@ -121,7 +133,7 @@ function hasDirExist(path) {
  * @param callback
  */
 function generateJSON(local, content, callback) {
-  fs.writeFile(path.join(DIST, `${local}.json`), JSON.stringify(content, null, 2), function (err) {
+  fs.writeFile(path.join(dist, `${local}.json`), JSON.stringify(content, null, 2), function (err) {
     if (err) throw err;
     callback && callback(err);
   });

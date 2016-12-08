@@ -10,17 +10,7 @@ const Yml = require('yml');
 const filePath = argv._[0];
 const DIST = argv.out === void 0 ? './' : typeof argv.out === 'boolean' ? './' : argv.out;
 
-function parseYML(path, callback) {
-  let content = {};
-  try {
-    content = Yml.load(path);
-    callback(null, content);
-  } catch (err) {
-    callback(err, content);
-  }
-}
-
-parseYML(filePath, function (err, content) {
+ymlParser(filePath, function (err, content) {
   if (err) {
     console.log(err);
     return;
@@ -41,6 +31,21 @@ parseYML(filePath, function (err, content) {
 });
 
 /**
+ * 解析yml
+ * @param path
+ * @param callback
+ */
+function ymlParser(path, callback) {
+  let content = {};
+  try {
+    content = Yml.load(path);
+    callback(null, content);
+  } catch (err) {
+    callback(err, content);
+  }
+}
+
+/**
  * 获取配置
  * @param content
  * @returns {*}
@@ -50,35 +55,6 @@ function configParser(content) {
     .pickBy((value, key)=>/^\$/.test(key))
     .mapKeys((value, key)=> key.replace(/^\$/, ''))
     .value();
-}
-
-/**
- * 判断目录是否已存在
- * @param path
- * @returns {boolean}
- */
-function hasDirExist(path) {
-  let hasDirExist = false;
-  try {
-    fs.lstatSync(path);
-    hasDirExist = true;
-  } catch (err) {
-    hasDirExist = false;
-  }
-  return hasDirExist
-}
-
-/**
- * 生成一个json文件
- * @param local
- * @param content
- * @param callback
- */
-function generateJSON(local, content, callback) {
-  fs.writeFile(path.join(DIST, `${local}.json`), JSON.stringify(content, null, 2), function (err) {
-    if (err) throw err;
-    callback && callback(err);
-  });
 }
 
 /**
@@ -120,4 +96,33 @@ function langParser(content) {
   });
 
   return langPack;
+}
+
+/**
+ * 判断目录是否已存在
+ * @param path
+ * @returns {boolean}
+ */
+function hasDirExist(path) {
+  let hasDirExist = false;
+  try {
+    fs.lstatSync(path);
+    hasDirExist = true;
+  } catch (err) {
+    hasDirExist = false;
+  }
+  return hasDirExist
+}
+
+/**
+ * 生成一个json文件
+ * @param local
+ * @param content
+ * @param callback
+ */
+function generateJSON(local, content, callback) {
+  fs.writeFile(path.join(DIST, `${local}.json`), JSON.stringify(content, null, 2), function (err) {
+    if (err) throw err;
+    callback && callback(err);
+  });
 }

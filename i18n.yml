@@ -1,0 +1,23 @@
+# Title for desc somthing
+
+$app: test
+$author: axetroy
+$supports: [en-US, zh-CN, zh-TW, zh-HK]
+$default: en-US
+
+login:
+  en-US: login
+  zh-CN: 登陆
+  zh-TW: 登陸
+  zh-HK: de lu
+
+register:
+  en-US: sign up
+  zh-CN: 注册
+  zh-TW: 註冊
+  aa: 123123
+
+key:
+  lang1: content1
+  lang2: content2
+  lang3: content3

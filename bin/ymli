@@ -1,0 +1,123 @@
+#!/usr/bin/env node
+
+const fs = require('fs');
+const path = require('path');
+const argv = require('yargs').argv;
+
+const _ = require('lodash');
+const Yml = require('yml');
+
+const filePath = argv._[0];
+const DIST = argv.out === void 0 ? './' : typeof argv.out === 'boolean' ? './' : argv.out;
+
+function parseYML(path, callback) {
+  let content = {};
+  try {
+    content = Yml.load(path);
+    callback(null, content);
+  } catch (err) {
+    callback(err, content);
+  }
+}
+
+parseYML(filePath, function (err, content) {
+  if (err) {
+    console.log(err);
+    return;
+  }
+
+  // 配置文件
+  let config = configParser(content);
+
+  // 纯粹语言包
+  let langPack = langParser(content);
+
+  if (!hasDirExist(DIST)) fs.mkdirSync(DIST);
+
+  _.each(config.supports, function (local) {
+    generateJSON(local, langPack[local]);
+  });
+
+});
+
+/**
+ * 获取配置
+ * @param content
+ * @returns {*}
+ */
+function configParser(content) {
+  return _.chain(content)
+    .pickBy((value, key)=>/^\$/.test(key))
+    .mapKeys((value, key)=> key.replace(/^\$/, ''))
+    .value();
+}
+
+/**
+ * 判断目录是否已存在
+ * @param path
+ * @returns {boolean}
+ */
+function hasDirExist(path) {
+  let hasDirExist = false;
+  try {
+    fs.lstatSync(path);
+    hasDirExist = true;
+  } catch (err) {
+    hasDirExist = false;
+  }
+  return hasDirExist
+}
+
+/**
+ * 生成一个json文件
+ * @param local
+ * @param content
+ * @param callback
+ */
+function generateJSON(local, content, callback) {
+  fs.writeFile(path.join(DIST, `${local}.json`), JSON.stringify(content, null, 2), function (err) {
+    if (err) throw err;
+    callback && callback(err);
+  });
+}
+
+/**
+ * 解析语言包
+ * @param content
+ * @returns {{}}
+ */
+function langParser(content) {
+  let config = configParser(content);
+  // 原始语言包
+  let lang = _.chain(content)
+    .pickBy((value, key)=>!/^\$/.test(key))
+    .value();
+
+  // 纯粹语言包
+  let langPack = {};
+
+  _.each(lang, function (value, key) {
+    lang[key] = _.pick(value, config.supports);
+
+    if (_.isEmpty(lang[key])) return delete lang[key];
+
+    // TODO：做一个fallback, 给未补全的语言，自动补上默认语言，如果默认语言也没有，则使用key
+    // 补全
+    _.each(config.supports, function (local) {
+      // 如果少定义了一条语言的翻译，则使用默认语言
+      // 默认语言不存在则使用key
+      if (!value[local]) lang[key][local] = value[config.default] || key;
+    });
+
+  });
+
+  // 获取纯粹的语言包
+  _.each(lang, function (value, key) {
+    _.each(value, function (content, local) {
+      if (!langPack[local]) langPack[local] = {};
+      langPack[local][key] = content
+    });
+  });
+
+  return langPack;
+}

@@ -1,5 +1,5 @@
 language: node_js
-sudo: false
+sudo: true
 node_js:
   - '6.9.2'
 
@@ -10,7 +10,7 @@ cache:
 before_script:
   - npm install yarn node-gyp -g
   - yarn
-  - npm rebuild node-gyp
+  - node-gyp rebuild
 
 script:
   - npm run test

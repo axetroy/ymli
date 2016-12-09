@@ -1,6 +1,6 @@
 {
   "name": "ymli",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "a cli tool, compile yml to json, useful to generate i18n file",
   "scripts": {
     "test": "./node_modules/.bin/mocha ./tests"

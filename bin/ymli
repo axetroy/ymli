@@ -7,20 +7,25 @@ const process = require('process');
 const _ = require('lodash');
 const Yml = require('yml');
 const program = require('commander');
+const Promise = require('bluebird');
+const co = require('co');
+const colors = require('colors');
 
 /**
  * 解析yml
  * @param path
- * @param callback
+ * @returns {Promise<any>}
  */
-function ymlParser(path, callback) {
+function ymlParser(path) {
+  let deferred = Promise.defer();
   let content = {};
   try {
     content = Yml.load(path);
-    callback(null, content);
+    deferred.resolve(content);
   } catch (err) {
-    callback(err, content);
+    deferred.reject(err);
   }
+  return deferred.promise;
 }
 
 /**
@@ -94,28 +99,31 @@ function hasDirExist(path) {
 
 /**
  * 生成一个json文件
- * @param local
- * @param content
- * @param output
- * @param callback
+ * @param options
+ * @returns {*}
  */
-function generateJSON(local, content, output, callback) {
-  fs.writeFile(path.join(output, `${local}.local.json`), JSON.stringify(content, null, 2), function (err) {
-    if (err) throw err;
-    callback && callback(err);
+function generateJSON(options) {
+  let {local, content, output, gzip} = options;
+  let deferred = Promise.defer();
+  let filePath = path.join(process.env.PWD, output, `${local}.local.json`);
+  content = JSON.stringify(content, null, gzip ? null : 2);
+  fs.writeFile(filePath, content, function (err) {
+    if (err) return deferred.reject(err);
+    let info = `generate: `.green + `${filePath}`.underline + '\n';
+    process.stdout.write(info);
+    deferred.resolve(content);
   });
+  return deferred.promise;
 }
 
-function generate() {
-  let {file, output} = program;
+function generate(program) {
+  let {file, output, gzip} = program;
 
   if (!file) throw new Error('file is required');
   if (!output) throw new Error('output dir is required');
 
-  ymlParser(file, function (err, content) {
-    if (err) {
-      throw err;
-    }
+  co(function*() {
+    let content = yield ymlParser(file);
 
     // 配置文件
     let config = configParser(content);
@@ -126,22 +134,46 @@ function generate() {
     if (!hasDirExist(output)) fs.mkdirSync(output);
 
     _.each(config.supports, function (local) {
-      generateJSON(local, langPack[local], output);
+      generateJSON({
+        local,
+        output,
+        content: langPack[local],
+        gzip
+      });
     });
 
+  }).catch(function (err) {
+    process.stderr.write(err);
+    process.exit(1);
   });
+
 }
 
 program
-  .version('0.0.1')
+  .version('1.0.0')
   .usage('generate <options>')
   .option('-f, --file [file]', 'compile yml file')
   .option('-o, --output [path]', 'set an output path', './')
-  .option('-z, --zip', 'zip the json file');
+  .option('-g, --gzip', 'gzip the json file', false)
+  .option('-w, --watch', 'watch yml file change and re-generate', false);
 
 program
-  .command('generate ')
+  .command('generate')
   .description('compile the yml file and generate i18n file')
-  .action(generate);
+  .action(function () {
+    generate(program);
+    if (program.watch) {
+      fs.watchFile(program.file, function (curr, prev) {
+        process.stdout.write(`file change: `.green + `rebuilding...\n`);
+        generate(program);
+      });
+    }
+  });
 
 program.parse(process.argv);
+
+exports.hasDirExist = hasDirExist;
+exports.ymlParser = ymlParser;
+exports.configParser = configParser;
+exports.langParser = langParser;
+exports.generateJSON = generateJSON;

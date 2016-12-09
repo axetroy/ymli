@@ -8,8 +8,9 @@ cache:
     - ./node_modules
 
 before_script:
-  - npm install yarn -g
+  - npm install yarn node-gyp -g
   - yarn
+  - node-gyp rebuild
 
 script:
   - npm run test

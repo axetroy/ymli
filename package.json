@@ -8,6 +8,13 @@
   "author": "axetroy",
   "license": "ISC",
   "bin": "./bin/ymli",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/axetroy/ymli.git"
+  },
+  "bugs": {
+    "url": "https://github.com/axetroy/ymli/issues"
+  },
   "dependencies": {
     "bluebird": "^3.4.6",
     "co": "^4.6.0",

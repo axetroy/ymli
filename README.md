@@ -15,7 +15,7 @@ ymli generate -f ./i18n.yml -c ./dist/
 ### Usage
 
 ```bash
-  Usage: ymli generate <options>
+  Usage: ymli <command> <options>
 
 
   Commands:
@@ -29,8 +29,8 @@ ymli generate -f ./i18n.yml -c ./dist/
     -f, --file [file]    compile yml file
     -o, --output [path]  set an output path
     -g, --gzip           gzip the json file
+    -a, --all-in-one     generate all lang in one json file
     -w, --watch          watch yml file change and re-generate
-
 ```
 
 ### Example

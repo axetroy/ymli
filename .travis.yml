@@ -10,7 +10,7 @@ cache:
 before_script:
   - npm install yarn node-gyp -g
   - yarn
-  - node-gyp rebuild
+  - npm rebuild node-gyp
 
 script:
   - npm run test

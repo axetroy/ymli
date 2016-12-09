@@ -1,13 +1,12 @@
 # ymli [![Build Status](https://travis-ci.org/axetroy/ymli.svg?branch=master)](https://travis-ci.org/axetroy/ymli)[![Dependency](https://david-dm.org/axetroy/ymli.svg)](https://david-dm.org/axetroy/ymli)
 
-
-> 生成i18n文件的cli工具
-> 根据yml文件，生成多个json文件，每个json文件则是一个语言包
+> a cli tool to generate i18n file
+> generate multiple json files, every file is a lang pack
 
 ### Install
 
 ```bash
-npm install -g https://github.com/axetroy/ymli.git
+npm install -g ymli
 
 # example
 ymli generate -f ./i18n.yml -c ./dist/
@@ -32,6 +31,53 @@ ymli generate -f ./i18n.yml -c ./dist/
     -g, --gzip           gzip the json file
     -w, --watch          watch yml file change and re-generate
 
+```
+
+### Example
+
+```yml
+# ./i18n.yml
+
+$app: test              # start with the $ sign mean config
+$author: axetroy
+$supports: [en-US, zh-CN, zh-TW, zh-HK]
+$default: en-US
+
+login:
+  en-US: login
+  zh-CN: 登陆
+  zh-TW: 登陸
+  zh-HK: 登陸
+
+register:
+  en-US: sign up
+  zh-CN: 注册
+  zh-TW: 註冊
+```
+
+run command
+
+```bash
+ymli generate -f ./i18n.yml -c ./dist/
+cd ./dist && ls
+# en-US.local.json  zh-CN.local.json  zh-HK.local.json  zh-TW.local.json
+```
+
+check result
+
+```bash
+cat en-US.local.json
+# {"login":"login","register":"sign up"}
+
+cat zh-CN.local.json
+# {"login":"登陆","register":"注册"}
+
+cat zh-HK.local.json
+# {"login":"登陸","register":"sign up"}
+# NOTICE:it will auto complete this entry(register) with default lang(here is en-US) event it didn't defined in yml;
+
+cat zh-TW.local.json
+# {"login":"登陸","register":"註冊"}
 ```
 
 ### Contribution

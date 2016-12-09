@@ -10,6 +10,8 @@ const program = require('commander');
 const Promise = require('bluebird');
 const co = require('co');
 const colors = require('colors');
+const util = require('../utils/console');
+const {debug, error, warn, log, info} = util;
 
 /**
  * 解析yml
@@ -56,6 +58,13 @@ function langParser(content) {
   let langPack = {};
 
   _.each(lang, function (value, key) {
+
+    // key中不能存在空格
+    if (/\s/.test(key)) {
+      error('Entry[ ' + key.red + " ] can't contain spaces");
+      return process.exit(1);
+    }
+
     lang[key] = _.pick(value, config.supports);
 
     if (_.isEmpty(lang[key])) return delete lang[key];

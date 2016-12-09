@@ -14,10 +14,10 @@ login:
 register:
   en-US: sign up
   zh-CN: 注册
-  zh-TW: 註冊
+  zh-TW: 註冊;
   aa: 123123
 
-ke y:
+key:
   lang1: content1
   lang2: content2
   lang3: content3

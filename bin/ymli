@@ -7,7 +7,7 @@ const process = require('process');
 const _ = require('lodash');
 const Yml = require('yml');
 const program = require('commander');
-const Promise = require('bluebird');
+const q = require('q');
 const co = require('co');
 const colors = require('colors');
 const util = require('../utils/console');
@@ -19,15 +19,13 @@ const {debug, error, warn, log, info} = util;
  * @returns {Promise<any>}
  */
 function ymlParser(path) {
-  let deferred = Promise.defer();
-  let content = {};
-  try {
-    content = Yml.load(path);
-    deferred.resolve(content);
-  } catch (err) {
-    deferred.reject(err);
-  }
-  return deferred.promise;
+  return co(function*() {
+    let content = Yml.load(path);
+    return yield q.resolve(content);
+  }).catch(function (err) {
+    console.error(err);
+    return q.reject(err);
+  });
 }
 
 /**
@@ -113,7 +111,7 @@ function hasDirExist(path) {
  */
 function generateJSON(options) {
   let {local, content, output, gzip} = options;
-  let deferred = Promise.defer();
+  let deferred = q.defer();
   let filePath = path.join(process.env.PWD, output, `${local}.local.json`);
   content = JSON.stringify(content, null, gzip ? null : 2);
   fs.writeFile(filePath, content, function (err) {
@@ -125,6 +123,10 @@ function generateJSON(options) {
   return deferred.promise;
 }
 
+/**
+ * 生成多个json文件
+ * @param program
+ */
 function generate(program) {
   let {file, output, gzip} = program;
 
@@ -158,23 +160,46 @@ function generate(program) {
 
 }
 
+function generateAllInOne(program) {
+  let {file, output, gzip} = program;
+  return co(function *() {
+    let content = yield ymlParser(file);
+    // 纯粹语言包
+    let langPack = langParser(content);
+    generateJSON({
+      local: 'all',
+      output,
+      content: langPack,
+      gzip
+    })
+  }).catch(function (err) {
+    process.stderr.write(err);
+    process.exit(1);
+    return q.reject(err);
+  });
+}
+
 program
   .version('1.0.0')
-  .usage('generate <options>')
+  .usage('<command> <options>')
   .option('-f, --file [file]', 'compile yml file')
   .option('-o, --output [path]', 'set an output path', './')
   .option('-g, --gzip', 'gzip the json file', false)
+  .option('-a, --all-in-one', 'generate all lang in one json file', false)
   .option('-w, --watch', 'watch yml file change and re-generate', false);
 
 program
   .command('generate')
   .description('compile the yml file and generate i18n file')
   .action(function () {
-    generate(program);
+    let func = program.allInOne ? generateAllInOne : generate;
+
+    func(program);
+
     if (program.watch) {
       fs.watchFile(program.file, function (curr, prev) {
         process.stdout.write(`file change: `.green + `rebuilding...\n`);
-        generate(program);
+        func(program);
       });
     }
   });

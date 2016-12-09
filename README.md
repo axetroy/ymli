@@ -3,6 +3,15 @@
 > 生成i18n文件的cli工具
 > 根据yml文件，生成多个json文件，每个json文件则是一个语言包
 
+### Install
+
+```bash
+npm install -g https://github.com/axetroy/ymli.git
+
+# example
+ymli generate -f ./i18n.yml -c ./dist/
+```
+
 ### Usage
 
 ```bash

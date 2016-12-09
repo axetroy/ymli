@@ -8,8 +8,7 @@ cache:
     - ./node_modules
 
 before_script:
-  - npm install yarn -g
-  - yarn
+  - npm install
 
 script:
   - npm run test

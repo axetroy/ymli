@@ -69,19 +69,19 @@ function langParser(content) {
 
     // TODO：做一个fallback, 给未补全的语言，自动补上默认语言，如果默认语言也没有，则使用key
     // 补全
-    _.each(config.supports, function (local) {
+    _.each(config.supports, function (locale) {
       // 如果少定义了一条语言的翻译，则使用默认语言
       // 默认语言不存在则使用key
-      if (!value[local]) lang[key][local] = value[config.default] || key;
+      if (!value[locale]) lang[key][locale] = value[config.default] || key;
     });
 
   });
 
   // 获取纯粹的语言包
   _.each(lang, function (value, key) {
-    _.each(value, function (content, local) {
-      if (!langPack[local]) langPack[local] = {};
-      langPack[local][key] = content
+    _.each(value, function (content, locale) {
+      if (!langPack[locale]) langPack[locale] = {};
+      langPack[locale][key] = content
     });
   });
 
@@ -110,9 +110,9 @@ function hasDirExist(path) {
  * @returns {*}
  */
 function generateJSON(options) {
-  let {local, content, output, gzip} = options;
+  let {locale, content, output, gzip} = options;
   let deferred = q.defer();
-  let filePath = path.join(process.env.PWD, output, `${local}.local.json`);
+  let filePath = path.join(process.env.PWD, output, `${locale}.locale.json`);
   content = JSON.stringify(content, null, gzip ? null : 2);
   fs.writeFile(filePath, content, function (err) {
     if (err) return deferred.reject(err);
@@ -144,11 +144,11 @@ function generate(program) {
 
     if (!hasDirExist(output)) fs.mkdirSync(output);
 
-    _.each(config.supports, function (local) {
+    _.each(config.supports, function (locale) {
       generateJSON({
-        local,
+        locale,
         output,
-        content: langPack[local],
+        content: langPack[locale],
         gzip
       });
     });
@@ -167,7 +167,7 @@ function generateAllInOne(program) {
     // 纯粹语言包
     let langPack = langParser(content);
     generateJSON({
-      local: 'all',
+      locale: 'all',
       output,
       content: langPack,
       gzip

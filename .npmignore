@@ -1,4 +1,7 @@
-./dist
-./tests
-./example
-./node_modules
+dist
+*.log
+.idea
+node_modules
+.tmp
+*.local.json
+example

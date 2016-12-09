@@ -1,7 +1,7 @@
 language: node_js
-sudo: true
+sudo: false
 node_js:
-  - '6.9.2'
+  - '7.2.1'
 
 cache:
   directories

@@ -1,4 +1,5 @@
-# ymli [![Build Status](https://travis-ci.org/axetroy/ymli.svg?branch=master)](https://travis-ci.org/axetroy/ymli)
+# ymli [![Build Status](https://travis-ci.org/axetroy/ymli.svg?branch=master)](https://travis-ci.org/axetroy/ymli)[![Dependency](https://david-dm.org/axetroy/ymli.svg)](https://david-dm.org/axetroy/ymli)
+
 
 > 生成i18n文件的cli工具
 > 根据yml文件，生成多个json文件，每个json文件则是一个语言包

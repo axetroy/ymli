@@ -1,5 +1,7 @@
 # ymli [![Build Status](https://travis-ci.org/axetroy/ymli.svg?branch=master)](https://travis-ci.org/axetroy/ymli)[![Dependency](https://david-dm.org/axetroy/ymli.svg)](https://david-dm.org/axetroy/ymli)
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/axetroy/ymli.svg)](https://greenkeeper.io/)
+
 > a cli tool to generate i18n file
 > generate multiple json files, every file is a lang pack
 

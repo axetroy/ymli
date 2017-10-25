@@ -22,7 +22,7 @@
     "commander": "^2.9.0",
     "lodash": "^4.17.2",
     "q": "^1.4.1",
-    "yargs": "^7.0.2",
+    "yargs": "^10.0.3",
     "yml": "^0.0.5"
   },
   "devDependencies": {
